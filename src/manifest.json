@@ -1,7 +1,7 @@
 {
-  "name": "MOCO Zeiterfassung",
+  "name": "MOCO Zeiterfassung | codeblick",
   "short_name": "MOCO",
-  "description": "MOCO Zeiterfassung Plugin",
+  "description": "MOCO Zeiterfassung Plugin (customized for codeblick)",
   "version": "0.9.20",
   "manifest_version": 2,
   "icons": {

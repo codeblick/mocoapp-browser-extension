@@ -107,18 +107,15 @@ export default {
 
   wrike: {
     name: "wrike",
-    host: "https://www.wrike.com",
+    host: "https://app.clickup.com",
     urlPatterns: [
-      ":host:/workspace.htm#path=mywork",
-      ":host:/workspace.htm#path=folder",
-      "https\\://app-eu.wrike.com/workspace.htm#path=mywork",
-      "https\\://app-eu.wrike.com/workspace.htm#path=folder",
+      ":host:/t/:id",
+      ":host:/:space/v/l/f/:folder"
     ],
-    queryParams: {
-      id: ["t", "ot"],
+    description: (document, service, { id }) => {
+      const title = document.querySelector(".task-name__overlay")?.textContent?.trim()
+      return `#${id} ${title || ""}`.trim()
     },
-    description: (document) => document.querySelector(".title-field-ghost")?.textContent?.trim(),
-    projectId: projectIdentifierBySelector(".header-title__main"),
     allowHostOverride: false,
   },
 
@@ -170,5 +167,5 @@ export default {
       return document.querySelector(".pulse_title")?.textContent?.trim()
     },
     allowHostOverride: false,
-  },
+  }
 }
