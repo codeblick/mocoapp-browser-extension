@@ -110,11 +110,12 @@ export default {
     host: "https://app.clickup.com",
     urlPatterns: [
       ":host:/t/:id",
+      ":host:/t/:id/:customId",
       ":host:/:space/v/l/f/:folder"
     ],
-    description: (document, service, { id }) => {
+    description: (document, service, { id, customId }) => {
       const title = document.querySelector(".task-name__overlay")?.textContent?.trim()
-      return `#${id} ${title || ""}`.trim()
+      return `#${customId || id} ${title || ""}`.trim()
     },
     allowHostOverride: false,
   },
