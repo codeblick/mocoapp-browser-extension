@@ -1,5 +1,5 @@
 export class Clickup {
-  async track(teamId, seconds, billable) {
+  async track(teamId, seconds, billable, description) {
     const now = Date.now()
     const duration = seconds * 1000
 
@@ -16,6 +16,7 @@ export class Clickup {
         tid: await this.getActiveTaskId(),
         stop: now,
         billable: billable,
+        description: description,
         via: "manual",
       }),
     })
