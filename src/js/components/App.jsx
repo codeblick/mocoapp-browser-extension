@@ -154,6 +154,7 @@ class App extends Component {
         this.changesetWithDefaults.remote_id,
         this.changesetWithDefaults.seconds,
         this.changesetWithDefaults.billable,
+        this.changesetWithDefaults.description,
       )
     }
 
