@@ -26,6 +26,7 @@ import { head } from "lodash"
 import TimeInputParser from "utils/TimeInputParser"
 import { get } from "lodash/fp"
 import { createFocusTrap } from "focus-trap"
+import { Clickup } from "../utils/clickup"
 
 class App extends Component {
   constructor(props) {
@@ -147,6 +148,14 @@ class App extends Component {
   handleSubmit = (event) => {
     event.preventDefault()
     const { service } = this.state
+
+    if (this.changesetWithDefaults.remote_service == "clickup") {
+      new Clickup().track(
+        this.changesetWithDefaults.remote_id,
+        this.changesetWithDefaults.seconds,
+        this.changesetWithDefaults.billable,
+      )
+    }
 
     sendMessage(
       "createActivity",
