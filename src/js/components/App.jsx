@@ -142,7 +142,8 @@ class App extends Component {
       (new Clickup()).track(
         this.changesetWithDefaults.remote_id,
         this.changesetWithDefaults.seconds,
-        this.changesetWithDefaults.billable
+        this.changesetWithDefaults.billable,
+        this.changesetWithDefaults.description,
       )
     }
 
