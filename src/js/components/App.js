@@ -29,6 +29,7 @@ import Header from "./shared/Header"
 import { head } from "lodash"
 import TimeInputParser from "utils/TimeInputParser"
 import { get } from "lodash/fp"
+import { Clickup } from "../utils/clickup"
 
 @observer
 class App extends Component {
@@ -130,6 +131,14 @@ class App extends Component {
   handleSubmit = (event) => {
     event.preventDefault()
     const { service } = this.state
+
+    if (this.changesetWithDefaults.remote_service == 'clickup') {
+      (new Clickup()).track(
+        this.changesetWithDefaults.remote_id,
+        this.changesetWithDefaults.seconds,
+        this.changesetWithDefaults.billable
+      )
+    }
 
     sendMessage(
       "createActivity",
