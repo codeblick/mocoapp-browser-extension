@@ -91,6 +91,9 @@ class Form extends Component {
             value={changeset.assignment_id}
             hasError={!!errors.assignment_id}
             onChange={onChange}
+            noOptionsMessage={() => "Zuerst Projekt wählen"}
+            defaultMenuIsOpen={true}
+            autoFocus
           />
           <Select
             className="moco-bx-select"
@@ -100,7 +103,7 @@ class Form extends Component {
             value={changeset.task_id}
             onChange={onChange}
             hasError={!!errors.task_id}
-            noOptionsMessage={() => "Zuerst Projekt wählen"}
+            noOptionsMessage={() => "Zuerst Task wählen"}
           />
           {errors.assignment_id ? (
             <div className="form-error">{errors.assignment_id.join("; ")}</div>
