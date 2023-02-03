@@ -49,7 +49,7 @@ const Popup = forwardRef((props, ref) => {
         <iframe
           ref={iFrameRef}
           src={browser.runtime.getURL("popup.html")}
-          style={{ width: "516px", height: "576px", transition: "height 0.1s ease-in-out" }}
+          style={{ width: "516px", height: "616px", transition: "height 0.1s ease-in-out" }}
         />
       </div>
     </div>
