@@ -1,9 +1,31 @@
+const TIMEOUT_MS = 5000
+
+const timeout = (ms, promise) => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error("TIMEOUT"))
+    }, ms)
+
+    promise
+      .then((value) => {
+        clearTimeout(timer)
+        resolve(value)
+      })
+      .catch((reason) => {
+        clearTimeout(timer)
+        reject(reason)
+      })
+  })
+}
+
 export class Clickup {
   async track(teamId, seconds, billable, description) {
+    console.log("MOCOAPP_BROWSER_EXTENSION", { teamId, seconds, billable, description })
+
     const now = Date.now()
     const duration = seconds * 1000
 
-    fetch(`https://app.clickup.com/scheduling/v1/team/${teamId}/time_entries/`, {
+    const promise = fetch(`https://app.clickup.com/scheduling/v1/team/${teamId}/time_entries/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,6 +42,13 @@ export class Clickup {
         via: "manual",
       }),
     })
+
+    try {
+      await timeout(TIMEOUT_MS, promise)
+    } catch (err) {
+      alert("An error occured!")
+      console.error("MOCOAPP_BROWSER_EXTENSION", err)
+    }
   }
 
   async getActiveTaskId() {
