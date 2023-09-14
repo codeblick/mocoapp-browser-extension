@@ -151,7 +151,7 @@ class App extends Component {
 
     if (this.changesetWithDefaults.remote_service == "clickup") {
       new Clickup().track(
-        this.changesetWithDefaults.remote_id,
+        this.changesetWithDefaults.remote_url.match(/\/t\/(\d+)/)[1],
         this.changesetWithDefaults.seconds,
         this.changesetWithDefaults.billable,
         this.changesetWithDefaults.description,
