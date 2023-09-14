@@ -138,9 +138,9 @@ class App extends Component {
     event.preventDefault()
     const { service } = this.state
 
-    if (this.changesetWithDefaults.remote_service == 'clickup') {
-      (new Clickup()).track(
-        this.changesetWithDefaults.remote_id,
+    if (this.changesetWithDefaults.remote_service == "clickup") {
+      new Clickup().track(
+        this.changesetWithDefaults.remote_url.match(/\/t\/(\d+)/)[1],
         this.changesetWithDefaults.seconds,
         this.changesetWithDefaults.billable,
         this.changesetWithDefaults.description,
