@@ -134,12 +134,12 @@ class App extends Component {
     sendMessage("stopTimer", { timedActivity, service }, "background")
   }
 
-  handleSubmit = (event) => {
+  handleSubmit = async (event) => {
     event.preventDefault()
     const { service } = this.state
 
     if (this.changesetWithDefaults.remote_service == "clickup") {
-      new Clickup().track(
+      await new Clickup().track(
         this.changesetWithDefaults.remote_url.match(/\/t\/(\d+)/)[1],
         this.changesetWithDefaults.seconds,
         this.changesetWithDefaults.billable,
