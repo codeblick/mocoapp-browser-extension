@@ -140,7 +140,7 @@ class App extends Component {
 
     if (this.changesetWithDefaults.remote_service == "clickup") {
       await new Clickup().track(
-        this.changesetWithDefaults.remote_url.match(/\/t\/(\d+)/)[1],
+        2545848,
         this.changesetWithDefaults.seconds,
         this.changesetWithDefaults.billable,
         this.changesetWithDefaults.description,

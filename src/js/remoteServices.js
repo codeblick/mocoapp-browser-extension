@@ -30,7 +30,17 @@ export default {
         document.querySelector(".cu-task-title__overlay")?.textContent?.trim() ||
         // ClickUp Version <3
         document.querySelector(".task-name__overlay")?.textContent?.trim()
-      return `#${customId || id} ${title || ""}`.trim()
+
+      let taskId = customId
+      if (!taskId) {
+        const match = document.title.match(/CB-\d+/)[0]
+
+        if (typeof match === "string") taskId = match
+        else if (Array.isArray(match)) taskId = match[0]
+        else taskId = id
+      }
+
+      return `#${taskId} ${title || ""}`.trim()
     },
     projectId: (document) => {
       // The title of the task
@@ -55,7 +65,15 @@ export default {
           return null
         }, null)
     },
-    id: (document, service, { id, customId }) => customId || id,
+    id: (document, service, { id, customId }) => {
+      if (customId) return customId
+
+      const match = document.title.match(/CB-\d+/)[0]
+
+      if (typeof match === "string") return match
+      else if (Array.isArray(match)) return match[0]
+      else return id
+    },
     allowHostOverride: false,
   },
 
