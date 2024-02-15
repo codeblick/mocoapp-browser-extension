@@ -183,6 +183,7 @@ class App extends Component {
       schedules,
       fromDate,
       toDate,
+      settingTimeTrackingHHMM,
       errorType,
       errorMessage,
     } = this.state
@@ -216,6 +217,7 @@ class App extends Component {
               activities={activities}
               schedules={schedules}
               selectedDate={new Date(this.changesetWithDefaults.date)}
+              settingTimeTrackingHHMM={settingTimeTrackingHHMM}
               onChange={this.handleSelectDate}
             />
             <Form
