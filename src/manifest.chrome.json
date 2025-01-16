@@ -12,7 +12,7 @@
   "options_ui": {
     "page": "options.html"
   },
-  "permissions": ["storage", "tabs", "scripting"],
+  "permissions": ["storage", "tabs", "scripting", "cookies"],
   "host_permissions": ["https://*.mocoapp.com/*", "https://app.clickup.com/*"],
   "background": {
     "service_worker": "background.[version].js"
