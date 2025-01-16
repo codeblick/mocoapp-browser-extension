@@ -151,7 +151,6 @@ class App extends Component {
 
     if (this.changesetWithDefaults.remote_service == "clickup") {
       await new Clickup().track(
-        2545848,
         this.changesetWithDefaults.seconds,
         this.changesetWithDefaults.billable,
         this.changesetWithDefaults.description,

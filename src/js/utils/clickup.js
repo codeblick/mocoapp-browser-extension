@@ -1,33 +1,30 @@
 export class Clickup {
-  async track(teamId, seconds, billable, description) {
+  async track(seconds, billable, description) {
     const taskId = await this.getActiveTaskId()
-
-    console.log("MOCOAPP_BROWSER_EXTENSION", { teamId, taskId, seconds, billable, description })
+    const teamId = await this.getTeamId()
+    const apiUrl = await this.getApiUrl(teamId)
 
     const now = Date.now()
     const duration = seconds * 1000
 
     try {
-      const res = await fetch(
-        `https://prod-eu-west-1-2.clickup.com/scheduling/v1/team/${teamId}/time_entries/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: await this.getAuthenticationHeader(),
-          },
-          body: JSON.stringify({
-            start: now - duration,
-            end: now,
-            duration: duration,
-            tid: taskId,
-            stop: now,
-            billable: billable,
-            description: description,
-            via: "manual",
-          }),
+      const res = await fetch(`${apiUrl}/team/${teamId}/time_entries/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: await this.getAuthenticationHeader(),
         },
-      )
+        body: JSON.stringify({
+          start: now - duration,
+          end: now,
+          duration: duration,
+          tid: taskId,
+          stop: now,
+          billable: billable,
+          description: description,
+          via: "manual",
+        }),
+      })
       console.log("MOCOAPP_BROWSER_EXTENSION", res.status)
     } catch (err) {
       console.log("MOCOAPP_BROWSER_EXTENSION", err)
@@ -39,7 +36,29 @@ export class Clickup {
   }
 
   async getAuthenticationHeader() {
-    return `Bearer ${await this.runFunc(() => localStorage.getItem("id_token"))}`
+    return new Promise((resolve) => {
+      chrome.cookies.get({ url: "https://app.clickup.com", name: "cu_jwt" }, function (cookie) {
+        if (cookie) {
+          resolve(`Bearer ${cookie.value}`)
+        } else {
+          resolve(null)
+        }
+      })
+    })
+  }
+
+  async getTeamId() {
+    return await this.runFunc(() => {
+      const config = JSON.parse(localStorage.getItem("cuHandshake"))
+      return Object.keys(config)[0]
+    })
+  }
+
+  async getApiUrl(teamId) {
+    return await this.runFunc(() => {
+      const config = JSON.parse(localStorage.getItem("cuHandshake"))
+      return config[teamId].appEnvironment.apiUrl
+    })
   }
 
   runFunc(func) {
