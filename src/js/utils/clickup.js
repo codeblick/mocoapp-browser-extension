@@ -2,7 +2,7 @@ export class Clickup {
   async track(seconds, billable, description) {
     const taskId = await this.getActiveTaskId()
     const teamId = await this.getTeamId()
-    const apiUrl = await this.getApiUrl(teamId)
+    const apiUrl = await this.getApiUrl()
 
     const now = Date.now()
     const duration = seconds * 1000
@@ -54,9 +54,10 @@ export class Clickup {
     })
   }
 
-  async getApiUrl(teamId) {
+  async getApiUrl() {
     return await this.runFunc(() => {
       const config = JSON.parse(localStorage.getItem("cuHandshake"))
+      const teamId = Object.keys(config)[0]
       return config[teamId].appEnvironment.apiUrl
     })
   }
