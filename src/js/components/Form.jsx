@@ -48,7 +48,7 @@ class Form extends Component {
     return [
       { value: "Erstanalyse & Anforderungsaufnahme", label: "Erstanalyse & Anforderungsaufnahme" },
       { value: "Entwicklung", label: "Entwicklung" },
-      { value: "Bugfixing", label: "Bugfixing" },
+      // { value: "Bugfixing", label: "Bugfixing" },
       { value: "Testing", label: "Testing" },
       { value: "Meeting & Abstimmung", label: "Meeting & Abstimmung" },
       { value: "Deployment & Monitoring", label: "Deployment & Monitoring" },
