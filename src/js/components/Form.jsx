@@ -18,11 +18,14 @@ class Form extends Component {
       remote_url: PropTypes.string,
       seconds: PropTypes.number,
       hours: PropTypes.string,
+      type: PropTypes.string,
+      custom_type: PropTypes.string,
     }).isRequired,
     errors: PropTypes.object,
     projects: PropTypes.array.isRequired,
     onChange: PropTypes.func.isRequired,
     onSubmit: PropTypes.func.isRequired,
+    type: PropTypes.string,
   }
 
   isValid() {
@@ -39,6 +42,18 @@ class Form extends Component {
     } = this.props
 
     return date === formatDate(new Date()) && seconds === 0
+  }
+
+  get types() {
+    return [
+      { value: "Erstanalyse & Anforderungsaufnahme", label: "Erstanalyse & Anforderungsaufnahme" },
+      { value: "Entwicklung", label: "Entwicklung" },
+      { value: "Bugfixing", label: "Bugfixing" },
+      { value: "Testing", label: "Testing" },
+      { value: "Meeting & Abstimmung", label: "Meeting & Abstimmung" },
+      { value: "Deployment & Monitoring", label: "Deployment & Monitoring" },
+      { value: "Sonstiges", label: "Sonstiges" },
+    ]
   }
 
   buttonStyle() {
@@ -75,6 +90,7 @@ class Form extends Component {
   render() {
     const { projects, changeset, errors, onChange, onSubmit } = this.props
     const project = Select.findOptionByValue(projects, changeset.assignment_id)
+    const { types } = this
 
     return (
       <form onSubmit={onSubmit}>
@@ -109,7 +125,31 @@ class Form extends Component {
             <div className="form-error">{errors.assignment_id.join("; ")}</div>
           ) : null}
           {errors.task_id ? <div className="form-error">{errors.task_id.join("; ")}</div> : null}
+
+          <Select
+            className="moco-bx-select"
+            name="type"
+            placeholder="Bitte auswählen oder -füllen..."
+            options={types || []}
+            value={changeset.type}
+            onChange={onChange}
+          />
+          <textarea
+            style={{ marginTop: "3px" }}
+            name="custom_type"
+            onChange={onChange}
+            value={changeset.custom_type}
+            placeholder={`Beschreibung der Tätigkeit${changeset.type == "Sonstiges" ? "" : " (optional)"}`}
+            maxLength={500}
+            rows={3}
+            onKeyDown={this.handleTextareaKeyDown}
+            required={changeset.type == "Sonstiges"}
+          />
+          {errors.description ? (
+            <div className="form-error">{errors.description.join("; ")}</div>
+          ) : null}
         </div>
+
         <div className={cn("form-group", { "has-error": errors.hours })}>
           <input
             name="hours"
@@ -122,20 +162,6 @@ class Form extends Component {
             autoFocus
           />
           {errors.hours ? <div className="form-error">{errors.hours.join("; ")}</div> : null}
-        </div>
-        <div className={cn("form-group", { "has-error": errors.description })}>
-          <textarea
-            name="description"
-            onChange={onChange}
-            value={changeset.description}
-            placeholder="Beschreibung der Tätigkeit – optional"
-            maxLength={500}
-            rows={3}
-            onKeyDown={this.handleTextareaKeyDown}
-          />
-          {errors.description ? (
-            <div className="form-error">{errors.description.join("; ")}</div>
-          ) : null}
         </div>
 
         <button

@@ -84,6 +84,8 @@ class App extends Component {
       seconds: new TimeInputParser(this.state.changeset.hours).parseSeconds(),
       description: service?.description || "",
       tag: "",
+      type: "Sonstiges",
+      custom_type: "",
     }
 
     return { ...defaults, ...this.state.changeset }
@@ -114,7 +116,7 @@ class App extends Component {
   }
 
   handleChange = (event) => {
-    const { projects } = this.state
+    const { projects, service, changeset } = this.state
     const {
       target: { name, value },
     } = event
@@ -128,6 +130,13 @@ class App extends Component {
       const project = findProjectByValue(value)(projects)
       this.setState((prev) => {
         prev.changeset.task_id = defaultTask(project?.tasks)?.value
+        return { ...prev }
+      })
+    }
+
+    if (["type", "custom_type"].includes(name)) {
+      this.setState((prev) => {
+        prev.changeset.description = `${service?.description || ""}${this.changesetWithDefaults.type != "Sonstiges" ? `\n${this.changesetWithDefaults.type}` : ""}${this.changesetWithDefaults.type != "Sonstiges" && this.changesetWithDefaults.custom_type.length > 0 ? ": " : "\n"}${this.changesetWithDefaults.custom_type.length > 0 ? `${this.changesetWithDefaults.custom_type}` : ""}`
         return { ...prev }
       })
     }
