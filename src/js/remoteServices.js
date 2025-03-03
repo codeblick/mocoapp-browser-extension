@@ -6,10 +6,13 @@ export default {
     name: "asana",
     host: "https://app.asana.com",
     urlPatterns: [
-      [/^:host:\/0\/\d+\/(\d+)/, ["id"]],
-      [/^:host:\/0\/inbox\/\d+\/(\d+)/, ["id"]],
-      ":host:/0/search",
-      [/^:host:\/0\/search\/\d+\/(\d+)/, ["id"]],
+      [/^:host:\/\d\/\d+\/(\d+)/, ["id"]],
+      [/^:host:\/\d\/\d+\/project\/\d+\/task\/(\d+)/, ["id"]],
+      [/^:host:\/\d\/\d+\/inbox\/\d+\/item\/\d+\/story\/(\d+)/, ["id"]],
+      [/^:host:\/\d\/home\/\d+\/(\d+)/, ["id"]],
+      [/^:host:\/\d\/inbox\/\d+\/(\d+)/, ["id"]],
+      ":host:/\d/search",
+      [/^:host:\/\d\/search\/\d+\/(\d+)/, ["id"]],
     ],
     queryParams: {
       id: "child",
