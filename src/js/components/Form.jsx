@@ -52,6 +52,7 @@ class Form extends Component {
       { value: "Testing", label: "Testing" },
       { value: "Meeting & Abstimmung", label: "Meeting & Abstimmung" },
       { value: "Deployment & Monitoring", label: "Deployment & Monitoring" },
+      { value: "Controlling", label: "Controlling" },
       { value: "Sonstiges", label: "Sonstiges" },
     ]
   }
