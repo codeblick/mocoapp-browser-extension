@@ -1,6 +1,5 @@
 node_modules/
 build/
-.env
 /.idea
 .DS_Store
 /.direnv
