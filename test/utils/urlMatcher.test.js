@@ -71,6 +71,13 @@ describe("utils", () => {
         expect(service.match.org).toEqual("moco-bx")
         expect(service.match.projectId).toBeUndefined()
         expect(service.match.id).toEqual("TEST2-1")
+
+        service = matcher("https://trello.com/c/Yw7bIKol/25024-dark-mode#any-hash")
+        expect(service.key).toEqual("trello")
+        expect(service.name).toEqual("trello")
+        expect(service.id).toEqual("Yw7bIKol")
+        expect(service.match.title).toEqual("25024-dark-mode")
+        expect(service.match.id).toEqual("Yw7bIKol")
       })
 
       it("matches url with hash", () => {

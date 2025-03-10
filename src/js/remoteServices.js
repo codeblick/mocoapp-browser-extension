@@ -160,7 +160,7 @@ export default {
   trello: {
     name: "trello",
     host: "https://trello.com",
-    urlPatterns: [":host:/c/:id/:title"],
+    urlPatterns: [":host:/c/:id/:title", ":host:/c/:id/:title#*"],
     description: (document, _service, { title }) =>
       document.querySelector("#card-back-name")?.textContent?.trim() || title,
     projectId: (document) =>
