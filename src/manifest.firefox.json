@@ -13,7 +13,14 @@
     "page": "options.html",
     "browser_style": true
   },
-  "permissions": ["https://*.mocoapp.com/*", "storage", "tabs"],
+  "permissions": [
+    "https://*.mocoapp.com/*",
+    "https://*.clickup.com/*",
+    "storage",
+    "tabs",
+    "cookies",
+    "scripting"
+  ],
   "background": {
     "page": "background.html"
   },

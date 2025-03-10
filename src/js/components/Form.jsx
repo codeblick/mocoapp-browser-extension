@@ -109,7 +109,7 @@ class Form extends Component {
             hasError={!!errors.assignment_id}
             onChange={onChange}
             noOptionsMessage={() => "Zuerst Projekt wählen"}
-            defaultMenuIsOpen={true}
+            defaultMenuIsOpen={false}
             autoFocus
           />
           <Select

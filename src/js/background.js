@@ -128,3 +128,76 @@ browser.action.onClicked.addListener((tab) => {
     })
   }
 })
+
+onMessage("track", async (_message) => {
+  const { seconds, billable, description } = _message.data
+
+  const taskId = await getActiveTaskId()
+  const teamId = await getTeamId()
+  const apiUrl = await getApiUrl()
+  const authorizationHeader = await getAuthenticationHeader()
+
+  const now = Date.now()
+  const duration = seconds * 1000
+
+  try {
+    await fetch(`${apiUrl}/team/${teamId}/time_entries/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authorizationHeader,
+      },
+      body: JSON.stringify({
+        start: now - duration,
+        end: now,
+        duration: duration,
+        tid: taskId,
+        stop: now,
+        billable: billable,
+        description: description,
+        via: "manual",
+      }),
+    })
+  } catch (err) {
+    console.error("MOCOAPP_BROWSER_EXTENSION", err)
+  }
+})
+
+async function getAuthenticationHeader() {
+  const cookie = await browser.cookies.get({ url: "https://app.clickup.com", name: "cu_jwt" })
+  return `Bearer ${cookie.value}`
+}
+
+async function getActiveTaskId() {
+  const tab = await getCurrentTab()
+
+  return await runFunc(tab, () => document.querySelector("[data-task-id]").dataset.taskId)
+}
+
+async function getTeamId() {
+  const tab = await getCurrentTab()
+
+  return await runFunc(tab, () => {
+    const config = JSON.parse(localStorage.getItem("cuHandshake"))
+    return Object.keys(config)[0]
+  })
+}
+
+async function getApiUrl() {
+  const tab = await getCurrentTab()
+
+  return await runFunc(tab, () => {
+    const config = JSON.parse(localStorage.getItem("cuHandshake"))
+    const teamId = Object.keys(config)[0]
+    return config[teamId].appEnvironment.apiUrl
+  })
+}
+
+async function runFunc(tab, func) {
+  const data = await browser.scripting.executeScript({
+    target: { tabId: tab.id, allFrames: false },
+    func: func,
+  })
+
+  return data[0].result
+}
