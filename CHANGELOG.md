@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.1] – 2025-03-13
+
+### Fixed
+
+- Fix reading project identifier from Asana [#966](https://github.com/everii-Group/mocoapp-browser-extension/pull/966)
+- Show MOCO-Bubble on Trello with URLs containing a hash
+
 ## [2.9.0] - 2025-03-03
 
 ### Added
