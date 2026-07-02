@@ -1,6 +1,60 @@
 import { projectIdentifierBySelector, projectRegex } from "./utils"
 import remoteServicesCommunity from "./remoteServicesCommunity"
 
+const cleanClickupBreadcrumbText = (text) =>
+  text
+    ?.trim()
+    ?.replace(/^[,>\s]+|[,>\s]+$/g, "")
+    ?.replace(/\s+[\[(][^\])]+[\])]$/, "")
+    ?.replace(/\s+/g, "-")
+    ?.trim()
+
+const isClickupSpace = (text) => ["clients"].includes(text?.toLowerCase())
+
+const clickupProjectFolder = (document) => {
+  const roots = Array.from(
+    document.querySelectorAll(
+      '[aria-modal="true"], .cu-task-view, .task-view, [class*="task-view"], [data-test*="task-view"]',
+    ),
+  )
+  const breadcrumbRoots = roots.length ? roots : [document]
+  const breadcrumbs = breadcrumbRoots.flatMap((root) => {
+    const legacyBreadcrumbs = Array.from(root.querySelectorAll(".cu-task-view-breadcrumbs__text"))
+    const breadcrumbContainers = Array.from(
+      root.querySelectorAll(".cu-task-view-breadcrumbs, [class*='readcrumb'], [data-test*='readcrumb']"),
+    )
+
+    return [
+      ...legacyBreadcrumbs,
+      ...breadcrumbContainers.flatMap((element) =>
+        Array.from(
+          element.querySelectorAll(
+            "a, [href], [title], [aria-label], .cu-task-view-breadcrumbs__text",
+          ),
+        ),
+      ),
+    ]
+  })
+  const breadcrumb = breadcrumbs
+    .map((element) => {
+      const link = element.matches?.("a") ? element : element.closest?.("a")
+      return {
+        href: link?.getAttribute("href") || element.getAttribute?.("href"),
+        text:
+          cleanClickupBreadcrumbText(
+            element.textContent ||
+              element.getAttribute?.("title") ||
+              element.getAttribute?.("aria-label"),
+          ),
+      }
+    })
+    .filter(({ text }) => text)
+  const folderBreadcrumb = breadcrumb.find(
+    ({ href, text }) => href?.includes("/v/l/f/") && !isClickupSpace(text),
+  )
+  return (folderBreadcrumb || breadcrumb.find(({ text }) => !isClickupSpace(text)))?.text
+}
+
 export default {
   asana: {
     name: "asana",
@@ -38,14 +92,16 @@ export default {
 
       let taskId = customId
       if (!taskId) {
-        const match = document.title.match(/CB-\d+/)[0]
+        const match = document.title?.match(/CB-\d+/)?.[0]
 
         if (typeof match === "string") taskId = match
         else if (Array.isArray(match)) taskId = match[0]
         else taskId = id
       }
 
-      return `#${taskId} ${title || ""}`.trim()
+      const projectFolder = clickupProjectFolder(document)
+      const ticket = projectFolder ? `#${projectFolder} ${taskId}` : `#${taskId}`
+      return `${ticket} ${title || ""}`.trim()
     },
     projectId: (document) => {
       // The title of the task
@@ -73,7 +129,7 @@ export default {
     id: (document, service, { id, customId }) => {
       if (customId) return customId
 
-      const match = document.title.match(/CB-\d+/)[0]
+      const match = document.title?.match(/CB-\d+/)?.[0]
 
       if (typeof match === "string") return match
       else if (Array.isArray(match)) return match[0]

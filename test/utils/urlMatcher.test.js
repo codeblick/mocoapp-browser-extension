@@ -258,6 +258,59 @@ describe("utils", () => {
     })
 
     describe("createEnhancer", () => {
+      const clickupBreadcrumb = (textContent, href) => ({
+        textContent,
+        matches: () => false,
+        closest: () => href && { getAttribute: () => href },
+      })
+
+      const clickupBreadcrumbLink = (textContent, href) => ({
+        textContent,
+        matches: (selector) => selector === "a",
+        getAttribute: (attr) => attr === "href" && href,
+      })
+
+      const clickupDocument = (title, breadcrumbs) => ({
+        title: "",
+        querySelector: jest.fn((selector) => {
+          if (selector === ".cu-task-title__overlay") {
+            return { textContent: title }
+          }
+          return null
+        }),
+        querySelectorAll: jest.fn((selector) => {
+          if (selector === ".cu-task-view-breadcrumbs__text") {
+            return breadcrumbs
+          }
+          return []
+        }),
+      })
+
+      const clickupDocumentWithBreadcrumbLinks = (title, links) => {
+        const breadcrumbContainer = {
+          querySelectorAll: jest.fn(() => links),
+        }
+
+        return {
+          title: "",
+          querySelector: jest.fn((selector) => {
+            if (selector === ".cu-task-title__overlay") {
+              return { textContent: title }
+            }
+            return null
+          }),
+          querySelectorAll: jest.fn((selector) => {
+            if (selector === ".cu-task-view-breadcrumbs__text") {
+              return []
+            }
+            if (selector.includes("readcrumb")) {
+              return [breadcrumbContainer]
+            }
+            return []
+          }),
+        }
+      }
+
       it("enhances a services", () => {
         const url = "https://github.com/hundertzehn/mocoapp/pull/123"
         const document = {
@@ -289,6 +342,78 @@ describe("utils", () => {
         const service = matcher("https://app.clickup.com/t/24301549/T2023-53")
         const enhancedService = createEnhancer(document)(service)
         expect(enhancedService.id).toEqual("T2023-53")
+      })
+
+      it("adds the WERO clickup folder as MOCO tag before the ticket id", () => {
+        const document = clickupDocument("3D Medien laden nicht", [
+          clickupBreadcrumb("CLIENTS", "/123/v/l/s/456"),
+          clickupBreadcrumb("WERO", "/123/v/l/f/789"),
+          clickupBreadcrumb("Entwicklung", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-30848")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual("#WERO CB-30848 3D Medien laden nicht")
+      })
+
+      it("adds the WOLF clickup folder as MOCO tag before the ticket id", () => {
+        const document = clickupDocument("Google Tag Manager Consent Mode V2", [
+          clickupBreadcrumb("CLIENTS", "/123/v/l/s/456"),
+          clickupBreadcrumb("WOLF", "/123/v/l/f/789"),
+          clickupBreadcrumb("Entwicklung", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-27616")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual(
+          "#WOLF CB-27616 Google Tag Manager Consent Mode V2",
+        )
+      })
+
+      it("uses other clickup folder names from the ticket breadcrumb", () => {
+        const document = clickupDocument("FactFinder Hybrid-Integration | Tracking", [
+          clickupBreadcrumb("CLIENTS", "/123/v/l/s/456"),
+          clickupBreadcrumb("ACME", "/123/v/l/f/789"),
+          clickupBreadcrumb("Entwicklung", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-30867")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual(
+          "#ACME CB-30867 FactFinder Hybrid-Integration | Tracking",
+        )
+      })
+
+      it("uses the clickup folder from breadcrumb links if text elements are missing", () => {
+        const document = clickupDocumentWithBreadcrumbLinks("3D Medien laden nicht", [
+          clickupBreadcrumbLink("CLIENTS", "/123/v/l/s/456"),
+          clickupBreadcrumbLink("WERO", "/123/v/l/f/789"),
+          clickupBreadcrumbLink("Entwicklung", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-30848")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual("#WERO CB-30848 3D Medien laden nicht")
+      })
+
+      it("does not use the clickup clients space as MOCO tag", () => {
+        const document = clickupDocumentWithBreadcrumbLinks("3D Medien laden nicht", [
+          clickupBreadcrumbLink("Clients,", "/123/v/l/f/456"),
+          clickupBreadcrumbLink("WERO [WER]", "/123/v/l/f/789"),
+          clickupBreadcrumbLink("Entwicklung", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-30848")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual("#WERO CB-30848 3D Medien laden nicht")
+      })
+
+      it("replaces spaces in clickup folder names for MOCO tags", () => {
+        const document = clickupDocumentWithBreadcrumbLinks("Google Tag Manager Consent Mode V2", [
+          clickupBreadcrumbLink("Clients,", "/123/v/l/s/456"),
+          clickupBreadcrumbLink("Wolf Tabakwaren [WT]", "/123/v/l/f/789"),
+          clickupBreadcrumbLink("Entwicklung", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-27616")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual(
+          "#Wolf-Tabakwaren CB-27616 Google Tag Manager Consent Mode V2",
+        )
       })
     })
   })
