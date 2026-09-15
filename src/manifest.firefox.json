@@ -16,9 +16,9 @@
   "permissions": [
     "https://*.mocoapp.com/*",
     "https://*.clickup.com/*",
+    "https://api.clickup.com/*",
     "storage",
     "tabs",
-    "cookies",
     "scripting"
   ],
   "background": {

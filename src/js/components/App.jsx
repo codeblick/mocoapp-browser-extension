@@ -11,8 +11,7 @@ import {
   ERROR_UPGRADE_REQUIRED,
   extractAndSetTag,
   findProjectByValue,
-  findProjectByLabel,
-  findProjectByIdentifier,
+  findSelectedProject,
   findTask,
   defaultTask,
   formatDate,
@@ -22,9 +21,7 @@ import InvalidConfigurationError from "components/Errors/InvalidConfigurationErr
 import UpgradeRequiredError from "components/Errors/UpgradeRequiredError"
 import UnknownError from "components/Errors/UnknownError"
 import Header from "./shared/Header"
-import { head } from "lodash"
 import TimeInputParser from "utils/TimeInputParser"
-import { get } from "lodash/fp"
 import { createFocusTrap } from "focus-trap"
 import { Clickup } from "../utils/clickup"
 
@@ -45,15 +42,12 @@ class App extends Component {
   get project() {
     const { service, projects, serviceLastProjectId, userLastProjectId } = this.state
 
-    return (
-      findProjectByValue(this.state.changeset.assignment_id)(projects) ||
-      findProjectByValue(Number(serviceLastProjectId))(projects) ||
-      findProjectByIdentifier(service?.projectId)(projects) ||
-      findProjectByLabel(String(service?.projectLabel || ""))(projects) || // extern project
-      findProjectByLabel("(" + String(service?.projectLabel || "") + ")")(projects) || // intern project
-      findProjectByValue(Number(userLastProjectId))(projects) ||
-      head(projects.flatMap(get("options")))
-    )
+    return findSelectedProject(projects, {
+      assignmentId: this.state.changeset.assignment_id,
+      service,
+      serviceLastProjectId,
+      userLastProjectId,
+    })
   }
 
   get task() {
@@ -158,12 +152,28 @@ class App extends Component {
     event.preventDefault()
     const { service } = this.state
 
-    if (this.changesetWithDefaults.remote_service == "clickup") {
-      await new Clickup().track(
-        this.changesetWithDefaults.seconds,
-        this.changesetWithDefaults.billable,
-        this.changesetWithDefaults.description,
-      )
+    this.setState((prev) => ({ ...prev, formErrors: {} }))
+
+    try {
+      if (this.changesetWithDefaults.remote_service == "clickup") {
+        const result = await new Clickup().track(
+          this.changesetWithDefaults.seconds,
+          this.changesetWithDefaults.billable,
+          this.changesetWithDefaults.description,
+        )
+
+        if (!result?.ok) {
+          throw new Error(result?.error || "ClickUp-Zeitbuchung fehlgeschlagen.")
+        }
+      }
+    } catch (error) {
+      this.setState((prev) => ({
+        ...prev,
+        formErrors: {
+          description: [error?.message || "ClickUp-Zeitbuchung fehlgeschlagen."],
+        },
+      }))
+      return
     }
 
     sendMessage(

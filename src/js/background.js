@@ -1,5 +1,6 @@
 import browser from "webextension-polyfill"
 import ApiClient from "api/Client"
+import ClickupClient from "api/ClickupClient"
 import { isChrome, getCurrentTab, getSettings, isBrowserTab } from "utils/browser"
 import { sendMessage, onMessage } from "webext-bridge/background"
 import { tabUpdated, settingsChanged, togglePopup, openPopup } from "utils/messageHandlers"
@@ -132,41 +133,29 @@ browser.action.onClicked.addListener((tab) => {
 onMessage("track", async (_message) => {
   const { seconds, billable, description } = _message.data
 
-  const taskId = await getActiveTaskId()
-  const teamId = await getTeamId()
-  const apiUrl = await getApiUrl()
-  const authorizationHeader = await getAuthenticationHeader()
-
-  const now = Date.now()
-  const duration = seconds * 1000
-
   try {
-    await fetch(`${apiUrl}/team/${teamId}/time_entries/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: authorizationHeader,
-      },
-      body: JSON.stringify({
-        start: now - duration,
-        end: now,
-        duration: duration,
-        tid: taskId,
-        stop: now,
-        billable: billable,
-        description: description,
-        via: "manual",
-      }),
+    const settings = await getSettings()
+    const taskId = await getActiveTaskId()
+    const teamId = await getTeamId()
+    const clickupClient = new ClickupClient({ apiToken: settings.clickupApiToken })
+
+    await clickupClient.createTimeEntry({
+      teamId,
+      taskId,
+      seconds,
+      billable,
+      description,
     })
+
+    return { ok: true }
   } catch (err) {
     console.error("MOCOAPP_BROWSER_EXTENSION", err)
+    return {
+      ok: false,
+      error: err?.message || "ClickUp-Zeitbuchung fehlgeschlagen.",
+    }
   }
 })
-
-async function getAuthenticationHeader() {
-  const cookie = await browser.cookies.get({ url: "https://app.clickup.com", name: "cu_jwt" })
-  return `Bearer ${cookie.value}`
-}
 
 async function getActiveTaskId() {
   const tab = await getCurrentTab()
@@ -180,16 +169,6 @@ async function getTeamId() {
   return await runFunc(tab, () => {
     const config = JSON.parse(localStorage.getItem("cuHandshake"))
     return Object.keys(config)[0]
-  })
-}
-
-async function getApiUrl() {
-  const tab = await getCurrentTab()
-
-  return await runFunc(tab, () => {
-    const config = JSON.parse(localStorage.getItem("cuHandshake"))
-    const teamId = Object.keys(config)[0]
-    return config[teamId].appEnvironment.apiUrl
   })
 }
 

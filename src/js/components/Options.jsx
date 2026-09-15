@@ -19,6 +19,7 @@ class Options extends Component {
     this.state = {
       subdomain: "",
       apiKey: "",
+      clickupApiToken: "",
       hostOverrides: {},
       errorMessage: null,
       isSuccess: false,
@@ -31,6 +32,7 @@ class Options extends Component {
       this.setState((prev) => {
         prev.subdomain = settings.subdomain || ""
         prev.apiKey = settings.apiKey || ""
+        prev.clickupApiToken = settings.clickupApiToken || ""
         prev.hostOverrides = settings.hostOverrides
         return { ...prev }
       })
@@ -68,6 +70,7 @@ class Options extends Component {
     setStorage({
       subdomain: this.state.subdomain,
       apiKey: this.state.apiKey,
+      clickupApiToken: this.state.clickupApiToken,
       settingTimeTrackingHHMM: false,
       hostOverrides: pipe(
         toPairs,
@@ -144,6 +147,20 @@ class Options extends Component {
             Den API-Schlüssel findest du in deinem Profil unter &quot;Integrationen&quot;.
           </p>
         </div>
+        <div className="form-group">
+          <label>Persönlicher ClickUp API-Token</label>
+          <input
+            type="password"
+            name="clickupApiToken"
+            value={this.state.clickupApiToken}
+            onKeyDown={this.handleInputKeyDown}
+            onChange={this.handleChange}
+            autoComplete="off"
+          />
+          <p className="text-muted">
+            Den persönlichen Token findest du in ClickUp unter Einstellungen → Apps → API-Token.
+          </p>
+        </div>
         {!this.state.showHostOverrideOptions && (
           <div className="moco-bx-options__host-overrides">
             <a href="#" className="moco-bx-btn__secondary" onClick={this.toggleHostOverrideOptions}>
@@ -156,7 +173,8 @@ class Options extends Component {
             <h3 style={{ marginBottom: 0 }}>Service-URLs</h3>
             <small>
               Doppelpunkt für Platzhalter verwenden, z.B.{" "}
-              <span style={{ backgroundColor: "rgba(100, 100, 100, 0.1)" }}>:org</span>. Mehrere URLs komma-getrennt aufschreiben. Siehe{" "}
+              <span style={{ backgroundColor: "rgba(100, 100, 100, 0.1)" }}>:org</span>. Mehrere
+              URLs komma-getrennt aufschreiben. Siehe{" "}
               <a
                 href="https://github.com/hundertzehn/mocoapp-browser-extension#remote-service-configuration"
                 target="_blank"
