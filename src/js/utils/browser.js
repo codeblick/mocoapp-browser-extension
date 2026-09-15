@@ -24,7 +24,13 @@ const getHostOverrides = (settings) => ({
 })
 
 export const getSettings = (withDefaultSubdomain = true) => {
-  const keys = ["subdomain", "apiKey", "settingTimeTrackingHHMM", "hostOverrides"]
+  const keys = [
+    "subdomain",
+    "apiKey",
+    "clickupApiToken",
+    "settingTimeTrackingHHMM",
+    "hostOverrides",
+  ]
   const { version } = browser.runtime.getManifest()
 
   return browser.storage.sync.get(keys).then((settings) => {

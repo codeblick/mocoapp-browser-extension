@@ -2,6 +2,7 @@ import { projects } from "../data"
 import {
   findProjectByValue,
   findProjectByIdentifier,
+  findSelectedProject,
   findTask,
   defaultTask,
   groupedProjectOptions,
@@ -55,6 +56,29 @@ describe("utils", () => {
       const options = groupedProjectOptions(projects)
       const project = findProjectByIdentifier(undefined)(options)
       expect(project).toBe(undefined)
+    })
+  })
+
+  describe("findSelectedProject", () => {
+    it("prefers the remote service project over the last project used on the same card", () => {
+      const options = groupedProjectOptions(projects)
+      const project = findSelectedProject(options, {
+        service: { projectId: "137" },
+        serviceLastProjectId: 944837106,
+      })
+
+      expect(project.identifier).toEqual("137")
+      expect(project.value).toEqual(944868981)
+    })
+
+    it("keeps a manually selected project as the highest priority", () => {
+      const options = groupedProjectOptions(projects)
+      const project = findSelectedProject(options, {
+        assignmentId: 944837106,
+        service: { projectId: "137" },
+      })
+
+      expect(project.value).toEqual(944837106)
     })
   })
 

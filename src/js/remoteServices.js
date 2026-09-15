@@ -10,8 +10,9 @@ const cleanClickupBreadcrumbText = (text) =>
     ?.trim()
 
 const isClickupSpace = (text) => ["clients"].includes(text?.toLowerCase())
+const clickupProjectIdentifierRegex = /[\[(]([\w/-]+)[\])]/
 
-const clickupProjectFolder = (document) => {
+const clickupBreadcrumbs = (document) => {
   const roots = Array.from(
     document.querySelectorAll(
       '[aria-modal="true"], .cu-task-view, .task-view, [class*="task-view"], [data-test*="task-view"]',
@@ -21,7 +22,9 @@ const clickupProjectFolder = (document) => {
   const breadcrumbs = breadcrumbRoots.flatMap((root) => {
     const legacyBreadcrumbs = Array.from(root.querySelectorAll(".cu-task-view-breadcrumbs__text"))
     const breadcrumbContainers = Array.from(
-      root.querySelectorAll(".cu-task-view-breadcrumbs, [class*='readcrumb'], [data-test*='readcrumb']"),
+      root.querySelectorAll(
+        ".cu-task-view-breadcrumbs, [class*='readcrumb'], [data-test*='readcrumb']",
+      ),
     )
 
     return [
@@ -35,24 +38,48 @@ const clickupProjectFolder = (document) => {
       ),
     ]
   })
-  const breadcrumb = breadcrumbs
+  return breadcrumbs
     .map((element) => {
       const link = element.matches?.("a") ? element : element.closest?.("a")
+      const rawText =
+        element.textContent ||
+        element.getAttribute?.("title") ||
+        element.getAttribute?.("aria-label")
       return {
         href: link?.getAttribute("href") || element.getAttribute?.("href"),
-        text:
-          cleanClickupBreadcrumbText(
-            element.textContent ||
-              element.getAttribute?.("title") ||
-              element.getAttribute?.("aria-label"),
-          ),
+        rawText: rawText?.trim(),
+        text: cleanClickupBreadcrumbText(rawText),
       }
     })
     .filter(({ text }) => text)
+}
+
+const clickupProjectFolder = (document) => {
+  const breadcrumb = clickupBreadcrumbs(document)
   const folderBreadcrumb = breadcrumb.find(
     ({ href, text }) => href?.includes("/v/l/f/") && !isClickupSpace(text),
   )
   return (folderBreadcrumb || breadcrumb.find(({ text }) => !isClickupSpace(text)))?.text
+}
+
+const clickupProjectId = (document) => {
+  const titleMatch = document
+    .querySelector(".cu-task-title__overlay")
+    ?.textContent?.match(projectRegex)
+  if (titleMatch && titleMatch[1]) {
+    return titleMatch[1]
+  }
+
+  return clickupBreadcrumbs(document)
+    .reverse()
+    .reduce((projectId, { rawText, text }) => {
+      if (projectId) {
+        return projectId
+      }
+
+      const match = rawText?.match(clickupProjectIdentifierRegex) || text?.match(projectRegex)
+      return match?.[1] || null
+    }, null)
 }
 
 export default {
@@ -103,29 +130,7 @@ export default {
       const ticket = projectFolder ? `#${projectFolder} ${taskId}` : `#${taskId}`
       return `${ticket} ${title || ""}`.trim()
     },
-    projectId: (document) => {
-      // The title of the task
-      const match = document
-        .querySelector(".cu-task-title__overlay")
-        ?.textContent?.match(projectRegex)
-      if (match && match[1]) {
-        return match[1]
-      }
-
-      // Breadcrumbs on top of the card, reverse order in order ot prioritize the last item
-      return Array.from(document.querySelectorAll(".cu-task-view-breadcrumbs__text"))
-        .reverse()
-        .reduce((projectId, element) => {
-          if (projectId) {
-            return projectId
-          }
-          const match = element.textContent.match(projectRegex)
-          if (match && match[1]) {
-            return match[1]
-          }
-          return null
-        }, null)
-    },
+    projectId: clickupProjectId,
     id: (document, service, { id, customId }) => {
       if (customId) return customId
 

@@ -37,6 +37,18 @@ export const findProjectByIdentifier = findProjectBy("identifier")
 export const findProjectByLabel = findProjectBy("label")
 export const findProjectByValue = findProjectBy("value")
 
+export const findSelectedProject = (
+  projects,
+  { assignmentId, service, serviceLastProjectId, userLastProjectId },
+) =>
+  findProjectByValue(assignmentId)(projects) ||
+  findProjectByIdentifier(service?.projectId)(projects) ||
+  findProjectByLabel(String(service?.projectLabel || ""))(projects) ||
+  findProjectByLabel("(" + String(service?.projectLabel || "") + ")")(projects) ||
+  findProjectByValue(Number(serviceLastProjectId))(projects) ||
+  findProjectByValue(Number(userLastProjectId))(projects) ||
+  head(projects.flatMap(get("options")))
+
 export const findTask = (id) => compose(find(pathEq("value", Number(id))), get("tasks"))
 
 export const defaultTask = (tasks) =>

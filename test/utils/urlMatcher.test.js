@@ -401,6 +401,7 @@ describe("utils", () => {
         const service = matcher("https://app.clickup.com/t/24301549/CB-30848")
         const enhancedService = createEnhancer(document)(service)
         expect(enhancedService.description).toEqual("#WERO CB-30848 3D Medien laden nicht")
+        expect(enhancedService.projectId).toEqual("WER")
       })
 
       it("replaces spaces in clickup folder names for MOCO tags", () => {
@@ -414,6 +415,21 @@ describe("utils", () => {
         expect(enhancedService.description).toEqual(
           "#Wolf-Tabakwaren CB-27616 Google Tag Manager Consent Mode V2",
         )
+        expect(enhancedService.projectId).toEqual("WT")
+      })
+
+      it("reads clickup project ids from parenthesized folder breadcrumbs", () => {
+        const document = clickupDocumentWithBreadcrumbLinks("Google Tag Manager Consent Mode V2", [
+          clickupBreadcrumbLink("Clients,", "/123/v/l/s/456"),
+          clickupBreadcrumbLink("Wolf Tabakwaren (WT)", "/123/v/l/f/789"),
+          clickupBreadcrumbLink("To-Do", "/123/v/l/li/101112"),
+        ])
+        const service = matcher("https://app.clickup.com/t/24301549/CB-27616")
+        const enhancedService = createEnhancer(document)(service)
+        expect(enhancedService.description).toEqual(
+          "#Wolf-Tabakwaren CB-27616 Google Tag Manager Consent Mode V2",
+        )
+        expect(enhancedService.projectId).toEqual("WT")
       })
     })
   })
