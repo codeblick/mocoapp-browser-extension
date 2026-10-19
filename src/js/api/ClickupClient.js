@@ -32,8 +32,6 @@ export default class ClickupClient {
         start: Date.now() - duration,
         duration,
         tid: taskId,
-        billable,
-        description,
       }),
     })
 
